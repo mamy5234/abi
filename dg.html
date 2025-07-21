@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Abilerime Doğum Günü Sürprizi 🎉</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+  body {
+    margin:0; padding:0;
+    font-family: 'Comic Neue', cursive, sans-serif;
+    background: linear-gradient(135deg, #a8edea, #fed6e3);
+    color: #222;
+    overflow-x: hidden;
+    text-align: center;
+  }
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    background-color: var(--color);
+    top: -10px;
+    animation: fall linear forwards;
+    border-radius: 3px;
+    opacity: 0.9;
+    z-index: 9999;
+  }
+  @keyframes fall {
+    to {
+      transform: translateY(110vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  .intro {
+    position: fixed;
+    width: 100vw; height: 100vh;
+    background: #222;
+    color: #fff;
+    display:flex; justify-content:center; align-items:center;
+    flex-direction: column;
+    z-index: 10000;
+  }
+  .intro h1 {
+    font-size: 3.5em;
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes glow {
+    from {text-shadow: 0 0 5px #ff4e50;}
+    to {text-shadow: 0 0 20px #ffda6a;}
+  }
+  .container {
+    padding: 80px 20px 50px;
+    max-width: 900px;
+    margin: auto;
+    display: none;
+  }
+  h2 {
+    font-size: 2.8em;
+    margin-bottom: 10px;
+    color: #ff4e50;
+  }
+  p {
+    font-size: 1.3em;
+    max-width: 700px;
+    margin: 0 auto 20px;
+    line-height: 1.6em;
+  }
+  button {
+    background: #ff4e50;
+    color: white;
+    padding: 15px 35px;
+    border: none;
+    border-radius: 20px;
+    margin: 15px 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(255,78,80,0.6);
+    transition: background-color 0.3s ease;
+    min-width: 180px;
+  }
+  button:hover {
+    background: #ff7878;
+  }
+  .message {
+    margin-top: 25px;
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #222;
+    min-height: 60px;
+  }
+  /* Fotoğraf alanı */
+  #step1 img {
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255,78,80,0.8);
+    width: 200px;
+    height: 200px;
+  }
+  #step1 .photo-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 40px;
+  }
+  textarea {
+    font-family: 'Comic Neue', cursive, sans-serif;
+    font-size: 1.1em;
+    padding: 10px;
+    border-radius: 12px;
+    border: 2px solid #ff4e50;
+    resize: vertical;
+  }
+</style>
+</head>
+<body>
+
+<!-- Giriş animasyonu -->
+<div class="intro" id="intro">
+  <h1>🎉 Abilerime Doğum Günü Kutlaması 🎉</h1>
+  <p>Loading... <span style="font-size:2em;">🎈🎊🥳</span></p>
+</div>
+
+<!-- Ana içerik -->
+<div class="container" id="mainContent">
+
+  <!-- 1. Adım: Sen kimsin? -->
+  <div id="step1">
+    <h2>Sen kimsin abi? 🤔</h2>
+    <button onclick="selectPerson('talha')">Talha Abi</button>
+    <button onclick="selectPerson('akif')">Akif Abi</button>
+
+    <div class="photo-container">
+      <img src="photo1.jpg" alt="Talha Abi" />
+      <img src="photo2.jpg" alt="Akif Abi" />
+    </div>
+  </div>
+
+  <!-- 2. Adım: Soru ve cevap -->
+  <div id="step2" style="display:none;">
+    <h2 id="questionTitle"></h2>
+    <p id="questionText" style="font-size:1.2em;"></p>
+    <div id="optionsContainer"></div>
+    <div class="message" id="feedback"></div>
+  </div>
+
+  <!-- 3. Adım: Sonuç mesajı + görüş -->
+  <div id="step3" style="display:none;">
+    <h2 id="finalTitle"></h2>
+    <p id="finalMessage"></p>
+
+    <h3>Abi, senin hakkındaki düşünceni yaz! ✍️</h3>
+    <textarea id="userOpinion" rows="5" style="width: 90%; max-width: 600px;" placeholder="Buraya yazabilirsin..."></textarea><br/>
+    <button onclick="submitOpinion()">Gönder</button>
+
+    <p id="thankYouMessage" style="color:green; font-weight:bold; margin-top:15px;"></p>
+
+    <button onclick="restart()" style="margin-top:40px;">Baştan Başla</button>
+  </div>
+
+</div>
+
+<script>
+  // Konfeti animasyonu
+  function createConfetti() {
+    for(let i=0; i<100; i++) {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti-piece');
+      confetti.style.setProperty('--color', randomColor());
+      confetti.style.left = Math.random() * window.innerWidth + 'px';
+      confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      confetti.style.animationDelay = (Math.random() * 5) + 's';
+      confetti.style.top = '-10px';
+      document.body.appendChild(confetti);
+    }
+  }
+  function randomColor() {
+    const colors = ['#ff4e50', '#fc913a', '#f9d423', '#ede574', '#e1f5c4'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  // Sayfa yüklendiğinde
+  window.onload = function() {
+    setTimeout(() => {
+      document.getElementById('intro').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      createConfetti();
+    }, 3000);
+  }
+
+  let currentPerson = '';
+  let currentQuestionIndex = 0;
+
+  const questions = {
+    talha: {
+      questions: [
+        {
+          question: "Bilgisayar bilimlerinde 'Big O' notasyonu neyi ifade eder?",
+          options: [
+            "Algoritmanın çalışma zamanı karmaşıklığı",
+            "Veri tabanı büyüklüğü",
+            "Ekran çözünürlüğü",
+            "Programlama dili"
+          ],
+          correctIndex: 0,
+        },
+        {
+          question: "Python’da hangi ifade doğru bir değişken adıdır?",
+          options: [
+            "2degisken",
+            "degisken_2",
+            "degisken-2",
+            "degisken 2"
+          ],
+          correctIndex: 1,
+        }
+      ],
+      finalMessage: `
+        Selam Talha abi, öncelikle gelecekte olmayı düşündüğüm mesleğin insana ne kadar hasar verdiğini gözle gösterdiğin için teşekkürler.<br>
+        Seni ne zaman tam olarak tanırım bilmiyorum. Çok ilginç bir çarsın. Seni tamamen tanımak gerçekten çok zormuş onu farkettim. 😊<br>
+        Bu yeni yaşında başarıların daha da artar, kodların hatasız, projelerin sorunsuz olur inşallah.<br>
+        Senin de doğum günün kutlu olsun, nice bizli yaşlara aslan abimmm! 🦁
+      `
+    },
+    akif: {
+      questions: [
+        {
+          question: "İnsanın en büyük organı hangisidir?",
+          options: [
+            "Deri",
+            "Karaciğer",
+            "Kalp",
+            "Akciğer"
+          ],
+          correctIndex: 0,
+        },
+        {
+          question: "Kalp kaç odacıktan oluşur?",
+          options: [
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          correctIndex: 2,
+        }
+      ],
+      finalMessage: `
+        Akif abi, doktorluk gibi kazanılması zor bir mesleği kazanıp beni de çok çalıştırmak zorunda bıraktığınız için ikinize de teşekkür ederim.<br>
+        İnşallah yeni yaşında biraz daha sakin ve stresten uzak olursun.<br>
+        Doğum günün kutlu olsun, iyi ki benim abimsin seni seviyorum.<br>
+        Arada gel hep Yunanistan olmaz, özlüyoruz seni :D
+      `
+    }
+  };
+
+  function selectPerson(person) {
+    currentPerson = person;
+    currentQuestionIndex = 0;
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step3').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    showQuestion();
+    document.getElementById('feedback').innerText = '';
+  }
+
+  function showQuestion() {
+    const q = questions[currentPerson].questions[currentQuestionIndex];
+    document.getElementById('questionTitle').innerText = currentPerson === 'talha' ? "Talha Abi, Bilgisayar Mühendisliği Sorusu! 💻" : "Akif Abi, Doktorluk Sorusu! 🩺";
+    document.getElementById('questionText').innerText = q.question;
+    const optionsContainer = document.getElementById('optionsContainer');
+    optionsContainer.innerHTML = '';
+    q.options.forEach((opt, index) => {
+      const btn = document.createElement('button');
+      btn.innerText = opt;
+      btn.onclick = () => checkAnswer(index);
+      optionsContainer.appendChild(btn);
+    });
+    document.getElementById('feedback').innerText = '';
+  }
+
+  function checkAnswer(selectedIndex) {
+    const q = questions[currentPerson].questions[currentQuestionIndex];
+    if (selectedIndex === q.correctIndex) {
+      currentQuestionIndex++;
+      if (currentQuestionIndex >= questions[currentPerson].questions.length) {
+        // Son soru doğruysa final ekrana geç
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step3').style.display = 'block';
+        document.getElementById('finalTitle').innerText = `Tebrikler ${currentPerson === 'talha' ? 'Talha' : 'Akif'} Abi! 🎉`;
+        document.getElementById('finalMessage').innerHTML = questions[currentPerson].finalMessage;
+        document.getElementById('thankYouMessage').innerText = '';
+        document.getElementById('userOpinion').value = '';
+      } else {
+        // Sonraki soruyu göster
+        showQuestion();
+      }
+    } else {
+      // Yanlış cevap mesajı
+      document.getElementById('feedback').innerText = "Oha ama abi, bunu da bil yani ";
+    }
+  }
+
+  function restart() {
+    document.getElementById('step3').style.display = 'none';
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+  }
+
+  function submitOpinion() {
+    const opinion = document.getElementById('userOpinion').value.trim();
+    if (opinion.length === 0) {
+      alert("Lütfen önce bir şeyler yaz!");
+      return;
+    }
+    console.log("Kullanıcı görüşü:", opinion);
+    document.getElementById('thankYouMessage').innerText = "Teşekkürler abi! Görüşün bize ulaştı. 🎉";
+    document.getElementById('userOpinion').value = "";
+  }
+</script>
+
+</body>
+</html>
